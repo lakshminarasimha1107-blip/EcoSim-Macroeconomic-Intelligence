@@ -875,9 +875,7 @@ def load_macro_data(api_key: str, force_demo: bool):
 
     harmonized = harmonize_macro_series(raw_series)
     augmented = calculate_derived_indicators(harmonized)
-    # Convert Real GDP from USD to Indian Rupees (₹ Billions)
-    if "GDPC1" in augmented.columns:
-        augmented["GDPC1"] = augmented["GDPC1"] * USD_TO_INR
+    # Native official FRED units: Real GDP in Billions of Chained 2017 USD ($B)
     return raw_series, augmented, is_live, messages, metadata
 
 
@@ -950,7 +948,7 @@ with st.sidebar.expander("🎓 5-Minute Demo Sequence", expanded=False):
             <b>2. Overview:</b> Introduce core macro indicators, release cadences, Misery Index, and real interest rate.<br><br>
             <b>3. Indicators:</b> Tour historical timelines, recession shocks (2008, 2020), and quarterly/monthly differences.<br><br>
             <b>4. Inflation Forecast:</b> Present Ridge Regression predicting next-quarter inflation with zero lookahead leakage.<br><br>
-            <b>5. Policy Lab:</b> Test fiscal spending multiplier (ΔG in ₹B) and monetary interest-rate shock (Δr) comparative statics.<br><br>
+            <b>5. Policy Lab:</b> Test fiscal spending multiplier (ΔG in $B) and monetary interest-rate shock (Δr) comparative statics.<br><br>
             <b>6. Data Sources:</b> Review FRED series, keyless World Bank annual data, and methodology boundaries.
         </div>
         """,
@@ -1039,19 +1037,17 @@ df_filtered = df_macro[
 # NAVIGATION STATE SYNCHRONIZATION
 # ==============================================================================
 nav_options = [
-    "Overview",
-    "Economic Indicators",
-    "State Intelligence",
-    "Phillips Curve",
     "Inflation Forecast",
-    "India Macro Forecast",
     "Policy Lab",
+    "Overview",
+    "Phillips Curve",
+    "Economic Indicators",
     "Data Sources",
 ]
 
-# Ensure the homepage is the initial view when the application opens
+# Ensure the core model (Inflation Forecast - Slide 5) is the initial view when the application opens
 if "top_nav_bar" not in st.session_state:
-    st.session_state["top_nav_bar"] = None
+    st.session_state["top_nav_bar"] = "Inflation Forecast"
 
 # Query Parameter Support (e.g. ?page=Overview or ?page=Home)
 if "page" in st.query_params:
@@ -1271,10 +1267,98 @@ if selected_page is None:
     )
 
     # ROW 1: TWO CARDS (Overview & Economic Indicators)
+    # ==============================================================================
+    # ROW 1: CORE SLIDE 5 MODELS (Inflation Forecast & Policy Lab)
+    # ==============================================================================
     r1_c1, r1_c2 = st.columns(2)
 
-    # 1. ECONOMIC OVERVIEW (Soft Dimmed Blue)
+    # 1. INFLATION FORECAST STUDIO (Ridge Regression - Slide 5)
     with r1_c1:
+        st.markdown(
+            """
+            <a href="?page=Inflation%20Forecast" target="_self" class="feature-card-link">
+                <div class="feature-card card-orange">
+                    <div>
+                        <div class="card-top-row">
+                            <div class="card-icon-bubble bubble-orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                                    <circle cx="12" cy="12" r="3" fill="#EA580C"/>
+                                </svg>
+                            </div>
+                            <span class="card-pill-tag tag-orange">Slide 5 Core ML</span>
+                        </div>
+                        <div class="card-title-text">INFLATION FORECAST STUDIO (RIDGE REGRESSION)</div>
+                        <div class="card-desc-text">
+                            Next-quarter inflation forecasting using regularized Ridge Regression (L2 penalty &lambda;). Features empirical Phillips Curve predictors, chronological holdouts, and persistence benchmark.
+                        </div>
+                    </div>
+                    <div class="card-action-cue cue-orange">
+                        <span>Launch Ridge Forecaster</span>
+                        <span>&rarr;</span>
+                    </div>
+                </div>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.button(
+            "Launch Ridge Inflation Forecast &rarr;",
+            key="btn_card_forecast",
+            on_click=navigate_to,
+            args=("Inflation Forecast",),
+            width="stretch",
+        )
+
+    # 2. POLICY SIMULATION LAB (Keynesian & IS-LM - Slide 5)
+    with r1_c2:
+        st.markdown(
+            """
+            <a href="?page=Policy%20Lab" target="_self" class="feature-card-link">
+                <div class="feature-card card-coral">
+                    <div>
+                        <div class="card-top-row">
+                            <div class="card-icon-bubble bubble-coral">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="4" y1="21" x2="4" y2="14"/>
+                                    <line x1="4" y1="10" x2="4" y2="3"/>
+                                    <line x1="12" y1="21" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12" y2="3"/>
+                                    <line x1="20" y1="21" x2="20" y2="16"/>
+                                    <line x1="20" y1="12" x2="20" y2="3"/>
+                                </svg>
+                            </div>
+                            <span class="card-pill-tag tag-coral">Slide 5 Policy Lab</span>
+                        </div>
+                        <div class="card-title-text">POLICY SIMULATOR (KEYNESIAN & IS&ndash;LM)</div>
+                        <div class="card-desc-text">
+                            Interactive counterfactual simulations: Keynesian spending multiplier (&Delta;Y = &Delta;G / (1 &minus; MPC)) with round-by-round ripples, and simultaneous IS&ndash;LM goods/money market equilibrium shifts.
+                        </div>
+                    </div>
+                    <div class="card-action-cue cue-coral">
+                        <span>Simulate Policies</span>
+                        <span>&rarr;</span>
+                    </div>
+                </div>
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.button(
+            "Enter Policy Simulation Lab &rarr;",
+            key="btn_card_policy",
+            on_click=navigate_to,
+            args=("Policy Lab",),
+            width="stretch",
+        )
+
+    # ==============================================================================
+    # ROW 2: CORE MACRO OVERVIEW & PHILLIPS CURVE THEORY
+    # ==============================================================================
+    r2_c1, r2_c2 = st.columns(2)
+
+    # 3. ECONOMIC OVERVIEW & DERIVED INDICES (Soft Dimmed Blue)
+    with r2_c1:
         st.markdown(
             """
             <a href="?page=Overview" target="_self" class="feature-card-link">
@@ -1289,16 +1373,16 @@ if selected_page is None:
                                     <path d="M3 20h18"/>
                                 </svg>
                             </div>
-                            <span class="card-pill-tag tag-blue">Core Analytics</span>
+                            <span class="card-pill-tag tag-blue">Core Macro & Indices</span>
                         </div>
-                        <div class="card-title-text">ECONOMIC OVERVIEW</div>
+                        <div class="card-title-text">MACRO OVERVIEW & DERIVED INDICES</div>
                         <div class="card-desc-text">
-                            Explore the latest GDP, inflation, unemployment, and interest-rate indicators in Indian Rupees (₹) and standard metrics.
+                            Live FRED & World Bank indicators (GDP, CPI, UNRATE, Fed Funds). Includes Arthur Okun's Misery Index and Fisher Real Interest Rate calculations.
                         </div>
                     </div>
                     <div class="card-action-cue cue-blue">
                         <span>Launch Overview</span>
-                        <span>→</span>
+                        <span>&rarr;</span>
                     </div>
                 </div>
             </a>
@@ -1306,93 +1390,10 @@ if selected_page is None:
             unsafe_allow_html=True,
         )
         st.button(
-            "Launch Economic Overview →",
+            "Launch Economic Overview &rarr;",
             key="btn_card_overview",
             on_click=navigate_to,
             args=("Overview",),
-            width="stretch",
-        )
-
-    # 2. ECONOMIC INDICATORS (Soft Dimmed Teal)
-    with r1_c2:
-        st.markdown(
-            """
-            <a href="?page=Economic%20Indicators" target="_self" class="feature-card-link">
-                <div class="feature-card card-teal">
-                    <div>
-                        <div class="card-top-row">
-                            <div class="card-icon-bubble bubble-teal">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D9488" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-                                    <polyline points="16 7 22 7 22 13"/>
-                                </svg>
-                            </div>
-                            <span class="card-pill-tag tag-teal">Time Series</span>
-                        </div>
-                        <div class="card-title-text">ECONOMIC INDICATORS</div>
-                        <div class="card-desc-text">
-                            Explore historical economic trends, synchronized timelines, and compare macroeconomic indicators.
-                        </div>
-                    </div>
-                    <div class="card-action-cue cue-teal">
-                        <span>Compare Indicators</span>
-                        <span>→</span>
-                    </div>
-                </div>
-            </a>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.button(
-            "Explore Economic Indicators →",
-            key="btn_card_indicators",
-            on_click=navigate_to,
-            args=("Economic Indicators",),
-            width="stretch",
-        )
-
-    # ROW 2: TWO CARDS (State Economic Intelligence & Phillips Curve)
-    r2_c1, r2_c2 = st.columns(2)
-
-    # 3. STATE ECONOMIC INTELLIGENCE (Soft Dimmed Emerald)
-    with r2_c1:
-        st.markdown(
-            """
-            <a href="?page=State%20Intelligence" target="_self" class="feature-card-link">
-                <div class="feature-card card-emerald">
-                    <div>
-                        <div class="card-top-row">
-                            <div class="card-icon-bubble bubble-emerald">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 21h18"/>
-                                    <path d="M5 21V7l8-4v18"/>
-                                    <path d="M19 21V11l-6-4"/>
-                                    <path d="M9 9h1"/>
-                                    <path d="M9 13h1"/>
-                                    <path d="M9 17h1"/>
-                                </svg>
-                            </div>
-                            <span class="card-pill-tag tag-emerald">Regional Accounts</span>
-                        </div>
-                        <div class="card-title-text">STATE ECONOMIC INTELLIGENCE</div>
-                        <div class="card-desc-text">
-                            Explore state-level GSDP, per-capita income, PLFS labour statistics, and the transparent Economic Stress Index.
-                        </div>
-                    </div>
-                    <div class="card-action-cue cue-emerald">
-                        <span>Explore States</span>
-                        <span>→</span>
-                    </div>
-                </div>
-            </a>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.button(
-            "Explore State Intelligence →",
-            key="btn_card_state",
-            on_click=navigate_to,
-            args=("State Intelligence",),
             width="stretch",
         )
 
@@ -1414,14 +1415,14 @@ if selected_page is None:
                             </div>
                             <span class="card-pill-tag tag-purple">Macroeconomic Theory</span>
                         </div>
-                        <div class="card-title-text">PHILLIPS CURVE</div>
+                        <div class="card-title-text">PHILLIPS CURVE TRADE-OFF</div>
                         <div class="card-desc-text">
-                            Investigate the empirical trade-off between inflation and unemployment across historical economic cycles.
+                            Investigate the empirical trade-off between inflation and unemployment across business cycles with OLS fitted trendline and Lucas Critique disclaimer.
                         </div>
                     </div>
                     <div class="card-action-cue cue-purple">
                         <span>Analyze Trade-Off</span>
-                        <span>→</span>
+                        <span>&rarr;</span>
                     </div>
                 </div>
             </a>
@@ -1429,40 +1430,42 @@ if selected_page is None:
             unsafe_allow_html=True,
         )
         st.button(
-            "Explore Phillips Curve →",
+            "Explore Phillips Curve &rarr;",
             key="btn_card_phillips",
             on_click=navigate_to,
             args=("Phillips Curve",),
             width="stretch",
         )
 
-    # ROW 3: TWO CARDS (Inflation Forecast & India Macro Forecast)
+    # ==============================================================================
+    # ROW 3: TIME SERIES & DOCUMENTATION
+    # ==============================================================================
     r3_c1, r3_c2 = st.columns(2)
 
-    # 5. INFLATION FORECAST (Soft Dimmed Orange)
+    # 5. ECONOMIC INDICATORS (Soft Dimmed Teal)
     with r3_c1:
         st.markdown(
             """
-            <a href="?page=Inflation%20Forecast" target="_self" class="feature-card-link">
-                <div class="feature-card card-orange">
+            <a href="?page=Economic%20Indicators" target="_self" class="feature-card-link">
+                <div class="feature-card card-teal">
                     <div>
                         <div class="card-top-row">
-                            <div class="card-icon-bubble bubble-orange">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                                    <circle cx="12" cy="12" r="3" fill="#EA580C"/>
+                            <div class="card-icon-bubble bubble-teal">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D9488" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                                    <polyline points="16 7 22 7 22 13"/>
                                 </svg>
                             </div>
-                            <span class="card-pill-tag tag-orange">Machine Learning</span>
+                            <span class="card-pill-tag tag-teal">Time Series</span>
                         </div>
-                        <div class="card-title-text">INFLATION FORECAST</div>
+                        <div class="card-title-text">HISTORICAL TIME SERIES</div>
                         <div class="card-desc-text">
-                            Explore next-quarter inflation predictions generated by Ridge Regression without lookahead leakage.
+                            Compare historical trends across 25+ years with synchronized timelines and cross-country overlays (USA, India, China).
                         </div>
                     </div>
-                    <div class="card-action-cue cue-orange">
-                        <span>Generate Forecast</span>
-                        <span>→</span>
+                    <div class="card-action-cue cue-teal">
+                        <span>Compare Indicators</span>
+                        <span>&rarr;</span>
                     </div>
                 </div>
             </a>
@@ -1470,38 +1473,37 @@ if selected_page is None:
             unsafe_allow_html=True,
         )
         st.button(
-            "View Inflation Forecast →",
-            key="btn_card_forecast",
+            "Explore Economic Indicators &rarr;",
+            key="btn_card_indicators",
             on_click=navigate_to,
-            args=("Inflation Forecast",),
+            args=("Economic Indicators",),
             width="stretch",
         )
 
-    # 6. INDIA MACRO FORECAST (Soft Dimmed Indigo)
+    # 6. DATA SOURCES & METHODOLOGY (Neutral Slate)
     with r3_c2:
         st.markdown(
             """
-            <a href="?page=India%20Macro%20Forecast" target="_self" class="feature-card-link">
-                <div class="feature-card card-indigo">
+            <a href="?page=Data%20Sources" target="_self" class="feature-card-link">
+                <div class="feature-card" style="background:linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 60%, #F1F5F9 100%); border:1.5px solid #CBD5E1;">
                     <div>
                         <div class="card-top-row">
-                            <div class="card-icon-bubble bubble-indigo">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-                                    <path d="M2 12h20"/>
+                            <div class="card-icon-bubble" style="background:#F1F5F9; border:1px solid #CBD5E1;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                                 </svg>
                             </div>
-                            <span class="card-pill-tag tag-indigo">Indian Economy ML</span>
+                            <span class="card-pill-tag" style="background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;">Scientific Reference</span>
                         </div>
-                        <div class="card-title-text">INDIA MACRO FORECAST</div>
+                        <div class="card-title-text">METHODOLOGY & SOURCES</div>
                         <div class="card-desc-text">
-                            Multi-indicator regularized Ridge forecasting for Indian CPI inflation, Real GDP growth, and industrial production (IIP).
+                            Documentation of FRED and World Bank series, mathematical formulas, econometric safeguards, and citations (Hoerl & Kennard 1970).
                         </div>
                     </div>
-                    <div class="card-action-cue cue-indigo">
-                        <span>Explore India Models</span>
-                        <span>→</span>
+                    <div class="card-action-cue" style="background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;">
+                        <span>View Documentation</span>
+                        <span>&rarr;</span>
                     </div>
                 </div>
             </a>
@@ -1509,63 +1511,12 @@ if selected_page is None:
             unsafe_allow_html=True,
         )
         st.button(
-            "Explore India Macro Forecast →",
-            key="btn_card_india",
+            "View Methodology & Sources &rarr;",
+            key="btn_card_sources",
             on_click=navigate_to,
-            args=("India Macro Forecast",),
+            args=("Data Sources",),
             width="stretch",
         )
-
-    # ROW 4: POLICY LAB & DATA SOURCES
-    r4_c1, r4_c2 = st.columns(2)
-
-    # 7. POLICY LAB (Soft Dimmed Coral)
-    with r4_c1:
-        st.markdown(
-            """
-            <a href="?page=Policy%20Lab" target="_self" class="feature-card-link">
-                <div class="feature-card card-coral">
-                    <div>
-                        <div class="card-top-row">
-                            <div class="card-icon-bubble bubble-coral">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E11D48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="4" y1="21" x2="4" y2="14"/>
-                                    <line x1="4" y1="10" x2="4" y2="3"/>
-                                    <line x1="12" y1="21" x2="12" y2="12"/>
-                                    <line x1="12" y1="8" x2="12" y2="3"/>
-                                    <line x1="20" y1="21" x2="20" y2="16"/>
-                                    <line x1="20" y1="12" x2="20" y2="3"/>
-                                    <line x1="1" y1="14" x2="7" y2="14"/>
-                                    <line x1="9" y1="8" x2="15" y2="8"/>
-                                    <line x1="17" y1="16" x2="23" y2="16"/>
-                                </svg>
-                            </div>
-                            <span class="card-pill-tag tag-coral">Policy Simulation</span>
-                        </div>
-                        <div class="card-title-text">POLICY LAB</div>
-                        <div class="card-desc-text">
-                            Experiment with government-spending (in ₹B) and interest-rate shocks across two macroeconomic models.
-                        </div>
-                    </div>
-                    <div class="card-action-cue cue-coral">
-                        <span>Simulate Policies</span>
-                        <span>→</span>
-                    </div>
-                </div>
-            </a>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.button(
-            "Enter Policy Simulation Lab →",
-            key="btn_card_policy",
-            on_click=navigate_to,
-            args=("Policy Lab",),
-            width="stretch",
-        )
-
-    # 6. DATA SOURCES & TRANSPARENCY CARD (Neutral Slate)
-    with r3_c2:
         st.markdown(
             """
             <a href="?page=Data%20Sources" target="_self" class="feature-card-link">
@@ -1672,8 +1623,8 @@ elif selected_page == "Overview":
         render_kpi(
             c1,
             "REAL GDP",
-            f"₹{gdp_val:,.0f}B",
-            f"Chained Rupees (₹83/USD) · {gdp_date_str}",
+            f"${gdp_val:,.0f}B",
+            f"Chained 2017 USD · {gdp_date_str}",
             delta_val=gdp_delta,
             delta_suffix="%",
             delta_label="QoQ Change",
@@ -3569,20 +3520,20 @@ elif selected_page == "Policy Lab":
 
         # EXACTLY ONE SLIDER FOR SIMULATOR A
         delta_g_val = st.slider(
-            "Autonomous Government Spending Policy Shock ΔG (₹ Billions):",
-            min_value=-40000.0,
-            max_value=80000.0,
-            value=8000.0,
-            step=2000.0,
-            help="Simulates an expansionary (positive) or contractionary (negative) autonomous spending shift in Indian Rupees (₹B).",
+            "Autonomous Government Spending Policy Shock ΔG ($ Billions):",
+            min_value=-500.0,
+            max_value=1000.0,
+            value=250.0,
+            step=25.0,
+            help="Simulates an expansionary (positive) or contractionary (negative) autonomous spending shift in Billions of USD ($B).",
         )
 
         sim_keynes = simulate_keynesian_multiplier(delta_g=delta_g_val, mpc=0.75)
 
         ka1, ka2, ka3, ka4 = st.columns(4)
-        ka1.metric("Government Injection (ΔG)", f"₹{sim_keynes.delta_g:+,.1f}B", help="Autonomous fiscal expenditure shock in Indian Rupees.")
+        ka1.metric("Government Injection (ΔG)", f"${sim_keynes.delta_g:+,.1f}B", help="Autonomous fiscal expenditure shock in Billions USD.")
         ka2.metric("Expenditure Multiplier (k)", f"{sim_keynes.multiplier:.2f}x", help="Formula: k = 1 / (1 − MPC).")
-        ka3.metric("Total Output Impact (ΔY)", f"₹{sim_keynes.delta_y:+,.1f}B", help="Formula: ΔY = k × ΔG.")
+        ka3.metric("Total Output Impact (ΔY)", f"${sim_keynes.delta_y:+,.1f}B", help="Formula: ΔY = k × ΔG.")
         ka4.metric("MPS Assumption", f"{sim_keynes.mps:.2f}", help="Marginal Propensity to Save (1 − MPC).")
 
         col_c, col_p = st.columns([0.76, 0.24])
@@ -3597,10 +3548,10 @@ elif selected_page == "Policy Lab":
                 api_key_status="No API Key Required (Closed Analytical Solution)",
                 series_code="ΔY = k · ΔG = ΔG / (1 - MPC)",
                 frequency="Comparative Statics Equilibrium",
-                currency_unit="Indian Rupees (₹ Billions)",
+                currency_unit="Billions of USD ($B)",
                 badge_type="sim",
                 badge_text="THEORETICAL",
-                notes=f"Autonomous shock ΔG = ₹{sim_keynes.delta_g:+,.1f}B. MPC benchmark = {sim_keynes.mpc:.2f}, MPS = {sim_keynes.mps:.2f}, multiplier k = {sim_keynes.multiplier:.2f}."
+                notes=f"Autonomous shock ΔG = ${sim_keynes.delta_g:+,.1f}B. MPC benchmark = {sim_keynes.mpc:.2f}, MPS = {sim_keynes.mps:.2f}, multiplier k = {sim_keynes.multiplier:.2f}."
             )
 
         with st.expander("View Sequential Expenditure Rounds Table", expanded=True):
@@ -3634,7 +3585,7 @@ elif selected_page == "Policy Lab":
                 <span style="background:#FFF7ED; color:#EA580C; border:1px solid #FDBA74; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px;">SIMPLIFIED IS–LM EQUILIBRIUM FRAMEWORK</span><br>
                 <div style="margin-top:6px; font-weight:700; color:#0F172A; font-size:13.5px;">Macroeconomic Goods & Money Market Transmission:</div>
                 <div style="font-size:12px; color:#475569; line-height:1.55; margin-top:6px;">
-                    • <b>Goods Market (IS Curve):</b> <code>Y = [A − b · r] / (1 − c)</code>, where autonomous expenditure <code>A = ₹600B</code>, MPC <code>c = 0.75</code>, investment sensitivity <code>b = 50.0</code>.<br>
+                    • <b>Goods Market (IS Curve):</b> <code>Y = [A − b · r] / (1 − c)</code>, where autonomous expenditure <code>A = $600B</code>, MPC <code>c = 0.75</code>, investment sensitivity <code>b = 50.0</code>.<br>
                     • <b>Money Market (LM Curve):</b> <code>(M/P) = k_y · Y − h · r</code>, where money demand sensitivity <code>k_y = 0.20</code>, speculative sensitivity <code>h = 40.0</code>, price level <code>P = 1.0</code>.<br>
                     • <b>Transmission Channel:</b> The central bank alters the policy interest rate. Rate hikes (+Δr) raise the cost of capital, depressing investment along the IS curve and contracting equilibrium output; the money supply adjusts endogenously to sustain the policy rate.
                 </div>
@@ -3656,9 +3607,9 @@ elif selected_page == "Policy Lab":
         sim_islm = simulate_is_lm(delta_g=0.0, delta_r=delta_r_val)
 
         kb1, kb2, kb3, kb4 = st.columns(4)
-        kb1.metric("Equilibrium Output Y*", f"₹{sim_islm.y_new:,.1f}B", delta=f"{sim_islm.delta_y:+,.1f}B Output Shift")
+        kb1.metric("Equilibrium Output Y*", f"${sim_islm.y_new:,.1f}B", delta=f"{sim_islm.delta_y:+,.1f}B Output Shift")
         kb2.metric("Equilibrium Interest Rate r*", f"{sim_islm.r_new:.2f}%", delta=f"{sim_islm.delta_r:+.2f}% Rate Shock")
-        kb3.metric("Baseline Output Y₀*", f"₹{sim_islm.y_base:,.1f}B")
+        kb3.metric("Baseline Output Y₀*", f"${sim_islm.y_base:,.1f}B")
         kb4.metric("Baseline Rate r₀*", f"{sim_islm.r_base:.2f}%")
 
         col_c, col_p = st.columns([0.76, 0.24])
@@ -3679,7 +3630,7 @@ elif selected_page == "Policy Lab":
                 api_key_status="No API Key Required (Analytical Equilibrium)",
                 series_code="IS: Y = (A - br)/(1-c) | LM: M/P = ky·Y - hr",
                 frequency="Comparative Statics Equilibrium",
-                currency_unit="Output Y* in ₹ Billions, Interest Rate r* in %",
+                currency_unit="Output Y* in $ Billions, Interest Rate r* in %",
                 badge_type="sim",
                 badge_text="THEORETICAL",
                 notes=f"Monetary policy rate shock Δr = {delta_r_val:+.2f} percentage points. Money market liquidity endogenously clears at policy rate."
@@ -3694,7 +3645,7 @@ elif selected_page == "Policy Lab":
                     {"<br>".join(sim_islm.transmission_steps)}
                     <br><br>
                     <b>Documented Parameter Assumptions:</b><br>
-                    MPC <i>c = 0.75</i>, Investment Sensitivity <i>b = 50.0</i>, Money Demand <i>k_y = 0.20</i>, Speculative Sensitivity <i>h = 40.0</i>, Price Level <i>P = 1.0</i>, Autonomous Spending <i>A₀ = ₹600B</i>, Baseline Money Supply <i>M₀ = ₹600B</i>.<br><br>
+                    MPC <i>c = 0.75</i>, Investment Sensitivity <i>b = 50.0</i>, Money Demand <i>k_y = 0.20</i>, Speculative Sensitivity <i>h = 40.0</i>, Price Level <i>P = 1.0</i>, Autonomous Spending <i>A₀ = $600B</i>, Baseline Money Supply <i>M₀ = $600B</i>.<br><br>
                     <i>Methodological Limitations: This is a stylized closed-economy comparative statics model designed for educational demonstration. It abstracts from exchange-rate dynamics, inflationary feedback, and term premia. Outputs are illustrative scenarios, not commercial forecasts.</i>
                 </div>
             </div>
